@@ -9,6 +9,7 @@ workflow:
 stages:
   - build
   - publish
+  - trigger
 
 build:
   stage: build
@@ -69,3 +70,6 @@ publish:
         </servers>
       </settings>
       EOF
+
+include:
+  - local: '.gitlab/ci/github-mirror.yml'
