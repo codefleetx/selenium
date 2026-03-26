@@ -15,12 +15,19 @@ jobs:
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
           GITLAB_REPO: ${{ vars.GITLAB_REPO }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git clone --mirror \
             "https://oauth2:${GITLAB_TOKEN}@gitlab.com/${GITLAB_REPO}.git" \
             repo.git
           cd repo.git
+
           git remote add github \
-            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-          git push github --mirror --force
-          echo "✅ Mirrored ${GITLAB_REPO} → ${{ github.repository }}"
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+          
+            # Pushing ONLY branches (heads) and tags. 
+          # This ignores 'refs/merge-requests' and uses the PAT to bypass the workflow lock.
+          git push github --force --prune 'refs/heads/*:refs/heads/*'
+          git push github --force --tags
+
+          echo "✅ Mirroring successful"
